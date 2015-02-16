@@ -1,14 +1,23 @@
 package SdpFilePackage
 
-import java.net.{Inet6Address, UnknownHostException, InetAddress}
-import java.util.{ArrayList, List}
-import org.scala_tools.time.Imports._
+import java.net.{Inet6Address, InetAddress}
+
+//import scala.collection.mutable.ArrayBuffer
+
+//import java.util
+//import java.util.{ArrayList, List}
+//import java.util.ArrayList
+import org.joda.time.DateTime
+//package scala.collection.jcl
+//import org.scala_tools.time.Imports._
 //import scala.collection.JavaConversions.__
 
 /**
  * Created by mchudik on 2/16/2015.
  */
 class SdpFile {
+  def SayHello(name: String) = s"Hello, $name!"
+
   val SECONDS_DIFF_NTP_EPOCH_AND_JAVA_EPOCH = 2208988800L
   private val PAYLOAD_TYPE_FOR_AUDIO = 96
   private val PAYLOAD_TYPE_FOR_VIDEO = 97
@@ -17,20 +26,19 @@ class SdpFile {
   private var _version: Int = _
   private var _fileName: String = _
   private var _sessionVersionIndex: Int = _
-  private var _originator: Originator = new Originator()
+  private val _originator: Originator = new Originator()
   private var _sessionName: String = _
   private var _sessionDescription: String = _
-  private var _connectionData: ConnectionData = new ConnectionData()
+  private val _connectionData: ConnectionData = new ConnectionData()
   private var _startTime: DateTime = _
   private var _endTime: DateTime = _
-  private var _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]()
+  private val _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]
   private var _previousSdpMediaList: List[SdpMedia] = _
 
-  def CRLF = "\r\n" | "\n"
-  def SayHello(name:String) = s"Hello, $name!"
+  def CRLF = "\r\n"
 
   def setVersion(version: Int) {
-    updateModified(_version, version)
+//    updateModified(_version, version)
     _version = version
   }
 
@@ -43,7 +51,7 @@ class SdpFile {
   }
 
   def setSessionIdentifier(sessionIdentifier: Long) {
-    updateModified(_originator._sessionIdentifier, sessionIdentifier)
+//    updateModified(_originator._sessionIdentifier, sessionIdentifier)
     _originator._sessionIdentifier = sessionIdentifier
   }
 
@@ -64,13 +72,13 @@ class SdpFile {
   }
 
   def setStartTime(startTime: DateTime) {
-    startTime = normalizeTime(startTime)
+//    startTime = normalizeTime(startTime)
     updateModified(_startTime, startTime)
     _startTime = startTime
   }
 
   def setEndTime(endTime: DateTime) {
-    endTime = normalizeTime(endTime)
+//    endTime = normalizeTime(endTime)
     updateModified(_endTime, endTime)
     _endTime = endTime
   }
@@ -103,10 +111,10 @@ class SdpFile {
   }
 
   private def normalizeTime(dateTime: DateTime): DateTime = {
-    if (dateTime == null) {
+//    if (dateTime == null) {
       return dateTime
-    }
-    dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
+//    }
+//    dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
   }
 
   private def setSessionVersionIndexFromFileName() {
@@ -172,7 +180,7 @@ class SdpFile {
     val sb = new StringBuilder()
     sb.append("v=").append(0).append(CRLF)
     sb.append("o=").append(_originator).append(CRLF)
-    sb.append("s=").append(sessionName).append(CRLF)
+    sb.append("s=").append(_sessionName).append(CRLF)
     if (_sessionDescription != null && !_sessionDescription.trim().isEmpty) {
       sb.append("i=").append(_sessionDescription.trim()).append(CRLF)
     }
@@ -229,31 +237,31 @@ class SdpFile {
 
   object NetType extends Enumeration {
     val IN = new NetType()
-    class NetType extends Val
 
     implicit def convertValue(v: Value): NetType = v.asInstanceOf[NetType]
   }
+  class NetType {}
 
   object AddrType extends Enumeration {
     val IP4 = new AddrType()
     val IP6 = new AddrType()
-    class AddrType extends Val
 
     implicit def convertValue(v: Value): AddrType = v.asInstanceOf[AddrType]
   }
+  class AddrType {}
 
   private class Originator {
-    private var _userName: String = "-"
-    private var _sessionIdentifier: Long = convertToNtpTimeStamp(new DateTime())
-    private var _sessionVersion: Long = _
-    private var _netType: NetType = NetType.IN
-    private var _addrType: AddrType = AddrType.IP4
-    private var _unicastAddress: InetAddress = _
-    try {
-      _unicastAddress = InetAddress.getByAddress(Array(127, 0, 0, 1))
-    } catch {
-      case e: UnknownHostException => ThrowableUtility.rethrow(e)
-    }
+    var _userName: String = "-"
+    var _sessionIdentifier: Long = convertToNtpTimeStamp(new DateTime())
+    var _sessionVersion: Long = _
+    var _netType: NetType = NetType.IN
+    var _addrType: AddrType = AddrType.IP4
+    var _unicastAddress: InetAddress = _
+//    try {
+//      _unicastAddress = InetAddress.getByAddress(Array(127, 0, 0, 1))
+//    } catch {
+//      case e: UnknownHostException => ThrowableUtility.rethrow(e)
+//    }
 
     override def toString: String = {
       new StringBuilder().append(_userName).append(" ").append(_sessionIdentifier)
@@ -270,10 +278,11 @@ class SdpFile {
   }
 
   private class ConnectionData {
-    private var _netType: NetType = NetType.IN
-    private var _addrType: AddrType = _
-    private var _address: InetAddress = _
-    private var _ttl: java.lang.Integer = _
+    var _netType: NetType = NetType.IN
+    var _addrType: AddrType = _
+    var _address: InetAddress = _
+    var _ttl: java.lang.Integer = _
+
     private def initializeFields() {
       if (_address != null) {
         if (_address.isInstanceOf[Inet6Address]) {
@@ -299,7 +308,7 @@ class SdpFile {
     }
   }
 
-  object SdpMedia {
+  private object SdpMedia {
     def createInstance(mediaType: MediaType, port: Int, protocol: Protocol): SdpMedia = {
       if (protocol == Protocol.RTP_AVP) {
         return new RtpMedia(mediaType, port, protocol)
@@ -308,10 +317,11 @@ class SdpFile {
     }
   }
 
-  private abstract class SdpMedia private (protected val _mediaType: MediaType, protected val _port: Int, protected val _protocol: Protocol)
-  {
+  private abstract class SdpMedia (protected val _mediaType: MediaType, protected val _port: Int, protected val _protocol: Protocol) {
     private var _modified: Boolean = true
+
     def isModified: Boolean = _modified
+
     def resetModified() {
       _modified = false
     }
@@ -331,42 +341,46 @@ class SdpFile {
     }
   }
 
-  object RtpMedia {
+  private object RtpMedia {
+
     object Encoding extends Enumeration {
       val H264 = new Encoding("H264")
       val MPEG4_GENERIC = new Encoding("MPEG4-GENERIC")
-      class Encoding private (private var _stringRepresentation: String) extends Val {
-
-        def getStringRepresentation: String = _stringRepresentation
-      }
 
       implicit def convertValue(v: Value): Encoding = v.asInstanceOf[Encoding]
     }
 
     object Mode extends Enumeration {
       val AAC_HBR = new Mode("AAC-hbr")
-      class Mode private (private var _stringRepresentation: String) extends Val {
-
-        def getStringRepresentation: String = _stringRepresentation
-      }
 
       implicit def convertValue(v: Value): Mode = v.asInstanceOf[Mode]
     }
+
   }
 
-  private class RtpMedia private (mediaType: MediaType, port: Int, protocol: Protocol)
+  class Encoding (private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
+
+  class Mode (private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
+
+  private class RtpMedia (mediaType: MediaType, port: Int, protocol: Protocol)
     extends SdpMedia(mediaType, port, protocol) {
-    private var _payloadType: Int = _
-    private var _encoding: Encoding = _
-    private var _clockRate: Int = _
-    private var _audioChannels: java.lang.Integer = _
-    private var _profileLevelId: java.lang.Integer = _
-    private var _encodingParams: java.lang.Integer = _
-    private var _mode: Mode = _
-    private var _packetizationMode: java.lang.Integer = _
-    private var _sizeLength: java.lang.Integer = _
-    private var _indexLength: java.lang.Integer = _
-    private var _indexDeltaLength: java.lang.Integer = _
+    var _payloadType: Int = _
+    var _encoding: Encoding = _
+    var _clockRate: Int = _
+    var _audioChannels: java.lang.Integer = _
+    var _profileLevelId: java.lang.Integer = _
+    var _encodingParams: java.lang.Integer = _
+    var _mode: Mode = _
+    var _packetizationMode: java.lang.Integer = _
+    var _sizeLength: java.lang.Integer = _
+    var _indexLength: java.lang.Integer = _
+    var _indexDeltaLength: java.lang.Integer = _
 
     if (protocol != Protocol.RTP_AVP) {
       throw new RuntimeException("protocol '" + protocol + "' is invalid for RtpMedia")
@@ -484,18 +498,21 @@ class SdpFile {
   object MediaType extends Enumeration {
     val audio = new MediaType()
     val video = new MediaType()
-    class MediaType extends Val
 
     implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
   }
 
   object Protocol extends Enumeration {
     val RTP_AVP = new Protocol("RTP/AVP")
-    class Protocol private (private var _stringRepresentation: String) extends Val {
-
-      def getStringRepresentation: String = _stringRepresentation
-    }
 
     implicit def convertValue(v: Value): Protocol = v.asInstanceOf[Protocol]
   }
+
+  class MediaType {}
+
+  class Protocol private(private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
+
 }
