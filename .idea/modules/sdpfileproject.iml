@@ -24,5 +24,12 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-actors:2.10.0:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-reflect:2.10.0:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.10:1.9.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: commons-io:commons-io:2.3:jar" level="project" />
+    <orderEntry type="library" name="SBT: joda-time:joda-time:2.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.joda:joda-convert:1.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.3:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scalaj:scalaj-time_2.9.1:0.7:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.slf4j:slf4j-simple:1.7.5:jar" level="project" />
   </component>
 </module>
