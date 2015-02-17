@@ -1,16 +1,7 @@
 package SdpFilePackage
 
 import java.net.{Inet6Address, InetAddress}
-
-//import scala.collection.mutable.ArrayBuffer
-
-//import java.util
-//import java.util.{ArrayList, List}
-//import java.util.ArrayList
 import org.joda.time.DateTime
-//package scala.collection.jcl
-//import org.scala_tools.time.Imports._
-//import scala.collection.JavaConversions.__
 
 /**
  * Created by mchudik on 2/16/2015.
@@ -32,8 +23,8 @@ class SdpFile {
   private val _connectionData: ConnectionData = new ConnectionData()
   private var _startTime: DateTime = _
   private var _endTime: DateTime = _
-  private val _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]
-  private var _previousSdpMediaList: List[SdpMedia] = _
+//  private val _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]
+//  private var _previousSdpMediaList: List[SdpMedia] = _
 
   def CRLF = "\r\n"
 
@@ -89,7 +80,7 @@ class SdpFile {
   }
 
   def addOrUpdateMpeg4AudioMedia(port: Int, sampleRate: Int, channels: Int) {
-    initializeForUpdatingMedia()
+//    initializeForUpdatingMedia()
     val rtpMedia = findExistingOrCreateRtpMedia(MediaType.audio, port)
     rtpMedia._encoding = RtpMedia.Encoding.MPEG4_GENERIC
     rtpMedia._clockRate = sampleRate
@@ -103,7 +94,7 @@ class SdpFile {
   }
 
   def addOrUpdateH264VideoMedia(port: Int) {
-    initializeForUpdatingMedia()
+//    initializeForUpdatingMedia()
     val rtpMedia = findExistingOrCreateRtpMedia(MediaType.video, port)
     rtpMedia._encoding = RtpMedia.Encoding.H264
     rtpMedia._clockRate = 90000
@@ -131,6 +122,7 @@ class SdpFile {
   }
 
   private def findExistingOrCreateRtpMedia(mediaType: MediaType, port: Int): RtpMedia = {
+/*
     var result = findSdpMediaInList(_sdpMediaList, mediaType, port, Protocol.RTP_AVP).asInstanceOf[RtpMedia]
     if (result == null) {
       result = findSdpMediaInList(_previousSdpMediaList, mediaType, port, Protocol.RTP_AVP).asInstanceOf[RtpMedia]
@@ -138,17 +130,18 @@ class SdpFile {
         _sdpMediaList.add(result)
       }
     }
-    if (result == null) {
-      result = SdpMedia.createInstance(mediaType, port, Protocol.RTP_AVP).asInstanceOf[RtpMedia]
+*/
+//    if (result == null) {
+      val result = SdpMedia.createInstance(mediaType, port, Protocol.RTP_AVP).asInstanceOf[RtpMedia]
       mediaType match {
         case audio => result._payloadType = PAYLOAD_TYPE_FOR_AUDIO
         case video => result._payloadType = PAYLOAD_TYPE_FOR_VIDEO
       }
-      _sdpMediaList.add(result)
-    }
+//      _sdpMediaList.add(result)
+//    }
     result
   }
-
+/*
   private def findSdpMediaInList(sdpMediaList: List[SdpMedia],
                                  mediaType: MediaType,
                                  port: Int,
@@ -172,7 +165,7 @@ class SdpFile {
       }
     }
   }
-
+*/
   override def toString: String = {
     if (_modified || _originator._sessionVersion == 0) {
       _originator._sessionVersion = convertToNtpTimeStamp(new DateTime()) + _sessionVersionIndex
@@ -189,9 +182,9 @@ class SdpFile {
       .append(" ")
       .append(convertToNtpTimeStamp(_endTime))
       .append(CRLF)
-    for (sdpMedia <- _sdpMediaList) {
-      sb.append(sdpMedia.toString)
-    }
+//    for (sdpMedia <- _sdpMediaList) {
+//      sb.append(sdpMedia.toString)
+//    }
     sb.toString
   }
 
@@ -199,6 +192,7 @@ class SdpFile {
     if (_modified) {
       return true
     }
+/*
     for (sdpMedia <- _sdpMediaList if sdpMedia.isModified) {
       return true
     }
@@ -206,15 +200,18 @@ class SdpFile {
       _previousSdpMediaList.size != _sdpMediaList.size) {
       return true
     }
+*/
     false
   }
 
   def resetModified() {
     _modified = false
+/*
     _previousSdpMediaList = null
     for (sdpMedia <- _sdpMediaList) {
       sdpMedia.resetModified()
     }
+*/
   }
 
   protected def updateModified(oldValue: AnyRef, newValue: AnyRef) {
