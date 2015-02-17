@@ -28,6 +28,10 @@ class SdpFile {
 
   def CRLF = "\r\n"
 
+  def toBytes(xs: Int*) = xs.map(_.toByte).toArray
+
+  def getVersion: Int = _version
+
   def setVersion(version: Int) {
 //    updateModified(_version, version)
     _version = version
@@ -41,10 +45,14 @@ class SdpFile {
     setSessionVersionIndexFromFileName()
   }
 
+  def getSessionIdentifier: Long = _originator._sessionIdentifier
+
   def setSessionIdentifier(sessionIdentifier: Long) {
 //    updateModified(_originator._sessionIdentifier, sessionIdentifier)
     _originator._sessionIdentifier = sessionIdentifier
   }
+
+  def getSessionVersion: Long = _originator._sessionVersion
 
   def setSessionVersion(sessionVersion: Long) {
     _originator._sessionVersion = sessionVersion
@@ -57,10 +65,14 @@ class SdpFile {
     _sessionName = sessionName
   }
 
+  def getSessionDescription: String = _sessionDescription
+
   def setSessionDescription(sessionDescription: String) {
     updateModified(_sessionDescription, sessionDescription)
     _sessionDescription = sessionDescription
   }
+
+  def getStartTime: DateTime = _startTime
 
   def setStartTime(startTime: DateTime) {
 //    startTime = normalizeTime(startTime)
@@ -68,11 +80,15 @@ class SdpFile {
     _startTime = startTime
   }
 
+  def getEndTime: DateTime = _endTime
+
   def setEndTime(endTime: DateTime) {
 //    endTime = normalizeTime(endTime)
     updateModified(_endTime, endTime)
     _endTime = endTime
   }
+
+  def getConnectionAddress: InetAddress = _connectionData._address
 
   def setConnectionAddress(connectionAddress: InetAddress) {
     updateModified(_connectionData._address, connectionAddress)
@@ -254,11 +270,11 @@ class SdpFile {
     var _netType: NetType = NetType.IN
     var _addrType: AddrType = AddrType.IP4
     var _unicastAddress: InetAddress = _
-//    try {
-//      _unicastAddress = InetAddress.getByAddress(Array(127, 0, 0, 1))
-//    } catch {
-//      case e: UnknownHostException => ThrowableUtility.rethrow(e)
-//    }
+    try {
+      _unicastAddress = InetAddress.getByAddress(toBytes(127, 0, 0, 1))
+    } catch {
+      case e: Exception =>
+    }
 
     override def toString: String = {
       new StringBuilder().append(_userName).append(" ").append(_sessionIdentifier)
