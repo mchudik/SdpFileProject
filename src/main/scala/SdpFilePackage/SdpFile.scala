@@ -1,14 +1,16 @@
 package SdpFilePackage
 
 import java.net.{Inet6Address, InetAddress}
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeZone, DateTime}
 
 /**
  * Created by mchudik on 2/16/2015.
  */
 class SdpFile {
   def SayHello(name: String) = s"Hello, $name!"
-
+  def getRtpMediaString: String = {
+    _rtpMedia.toString()
+  }
   val SECONDS_DIFF_NTP_EPOCH_AND_JAVA_EPOCH = 2208988800L
   private val PAYLOAD_TYPE_FOR_AUDIO = 96
   private val PAYLOAD_TYPE_FOR_VIDEO = 97
@@ -25,6 +27,7 @@ class SdpFile {
   private var _endTime: DateTime = _
 //  private val _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]
 //  private var _previousSdpMediaList: List[SdpMedia] = _
+  private var _rtpMedia: RtpMedia = _
 
   def CRLF = "\r\n"
 
@@ -97,31 +100,32 @@ class SdpFile {
 
   def addOrUpdateMpeg4AudioMedia(port: Int, sampleRate: Int, channels: Int) {
 //    initializeForUpdatingMedia()
-    val rtpMedia = findExistingOrCreateRtpMedia(MediaType.audio, port)
-    rtpMedia._encoding = RtpMedia.Encoding.MPEG4_GENERIC
-    rtpMedia._clockRate = sampleRate
-    rtpMedia._audioChannels = channels
-    rtpMedia._encodingParams = 2
-    rtpMedia._profileLevelId = 2
-    rtpMedia._mode = RtpMedia.Mode.AAC_HBR
-    rtpMedia._sizeLength = 13
-    rtpMedia._indexLength = 3
-    rtpMedia._indexDeltaLength = 3
+    _rtpMedia = findExistingOrCreateRtpMedia(MediaType.audio,  port)
+    _rtpMedia._encoding = RtpMedia.Encoding.MPEG4_GENERIC
+    _rtpMedia._clockRate = sampleRate
+    _rtpMedia._audioChannels = channels
+    _rtpMedia._encodingParams = 2
+    _rtpMedia._profileLevelId = 2
+    _rtpMedia._mode = RtpMedia.Mode.AAC_HBR
+    _rtpMedia._sizeLength = 13
+    _rtpMedia._indexLength = 3
+    _rtpMedia._indexDeltaLength = 3
   }
 
   def addOrUpdateH264VideoMedia(port: Int) {
 //    initializeForUpdatingMedia()
-    val rtpMedia = findExistingOrCreateRtpMedia(MediaType.video, port)
-    rtpMedia._encoding = RtpMedia.Encoding.H264
-    rtpMedia._clockRate = 90000
-    rtpMedia._packetizationMode = 1
+    _rtpMedia = findExistingOrCreateRtpMedia(MediaType.video, port)
+    _rtpMedia._encoding = RtpMedia.Encoding.H264
+    _rtpMedia._clockRate = 90000
+    _rtpMedia._packetizationMode = 1
   }
 
-  private def normalizeTime(dateTime: DateTime): DateTime = {
-//    if (dateTime == null) {
+  def normalizeTime(dateTime: DateTime): DateTime = {
+    if (dateTime == null) {
       return dateTime
-//    }
-//    dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
+    }
+    val newTime = dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
+    newTime.toDateTime
   }
 
   private def setSessionVersionIndexFromFileName() {
@@ -155,7 +159,7 @@ class SdpFile {
       }
 //      _sdpMediaList.add(result)
 //    }
-    result
+      result
   }
 /*
   private def findSdpMediaInList(sdpMediaList: List[SdpMedia],
@@ -193,7 +197,7 @@ class SdpFile {
     if (_sessionDescription != null && !_sessionDescription.trim().isEmpty) {
       sb.append("i=").append(_sessionDescription.trim()).append(CRLF)
     }
-    sb.append("c=").append(_connectionData.toString).append(CRLF)
+    sb.append("c=").append(_connectionData.toString()).append(CRLF)
     sb.append("t=").append(convertToNtpTimeStamp(_startTime))
       .append(" ")
       .append(convertToNtpTimeStamp(_endTime))
@@ -201,7 +205,7 @@ class SdpFile {
 //    for (sdpMedia <- _sdpMediaList) {
 //      sb.append(sdpMedia.toString)
 //    }
-    sb.toString
+    sb.toString()
   }
 
   def isModified: Boolean = {
@@ -286,7 +290,7 @@ class SdpFile {
         .append(_addrType)
         .append(" ")
         .append(_unicastAddress.getHostAddress)
-        .toString
+        .toString()
     }
   }
 
@@ -308,7 +312,7 @@ class SdpFile {
         }
       }
     }
-
+/*
     override def toString: String = {
       initializeFields()
       val sb = new StringBuilder().append(_netType).append(" ").append(_addrType)
@@ -317,9 +321,9 @@ class SdpFile {
       if (_ttl != null) {
         sb.append("/").append(_ttl)
       }
-      sb.toString
+      sb.toString()
     }
-  }
+*/  }
 
   private object SdpMedia {
     def createInstance(mediaType: MediaType, port: Int, protocol: Protocol): SdpMedia = {
@@ -401,10 +405,15 @@ class SdpFile {
 
     override def toString: String = {
       if (_protocol == null || _encoding == null) {
-        return super.toString
+        return super.toString()
+      }
+      var strMediaType:String = ""
+      _mediaType match {
+        case audio => strMediaType = "audio"
+        case video => strMediaType = "video"
       }
       val sb = new StringBuilder()
-      sb.append("m=").append(_mediaType).append(" ").append(_port)
+      sb.append("m=").append(strMediaType).append(" ").append(_port)
         .append(" ")
         .append(_protocol.getStringRepresentation)
         .append(" ")
@@ -426,7 +435,7 @@ class SdpFile {
           .append(customParameters)
           .append(CRLF)
       }
-      sb.toString
+      sb.toString()
     }
 
     private def determineCustomParameters(): String = {
@@ -467,7 +476,7 @@ class SdpFile {
       if (sb.length == 0) {
         null
       } else {
-        sb.toString
+        sb.toString()
       }
     }
 
@@ -512,16 +521,18 @@ class SdpFile {
     val audio = new MediaType()
     val video = new MediaType()
 
-    implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
+//    class MediaTypeVal extends Val
+
+//    implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
   }
+  class MediaType
+
 
   object Protocol extends Enumeration {
     val RTP_AVP = new Protocol("RTP/AVP")
 
     implicit def convertValue(v: Value): Protocol = v.asInstanceOf[Protocol]
   }
-
-  class MediaType {}
 
   class Protocol private(private var _stringRepresentation: String) {
 

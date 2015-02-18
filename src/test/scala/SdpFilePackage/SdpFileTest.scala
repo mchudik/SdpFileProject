@@ -57,4 +57,16 @@ class SdpFileTest extends org.scalatest.FunSuite {
     sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(127, 0, 0, 1)))
     assert(sdpFile.getConnectionAddress == InetAddress.getByName("127.0.0.1"))
   }
+  test("addOrUpdateMpeg4AudioMedia Method works correctly") {
+    val sdpFile = new SdpFile
+    sdpFile.addOrUpdateMpeg4AudioMedia(1935, 44100, 2)
+    val str = sdpFile.getRtpMediaString
+    println(str)
+  }
+  test("addOrUpdateH264VideoMedia Method works correctly") {
+    val sdpFile = new SdpFile
+    sdpFile.addOrUpdateH264VideoMedia(1935)
+    val str = sdpFile.getRtpMediaString
+    println(str)
+  }
 }
