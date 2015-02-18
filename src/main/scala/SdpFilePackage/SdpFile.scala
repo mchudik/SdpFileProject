@@ -78,16 +78,14 @@ class SdpFile {
   def getStartTime: DateTime = _startTime
 
   def setStartTime(startTime: DateTime) {
-//    startTime = normalizeTime(startTime)
-    updateModified(_startTime, startTime)
+    updateModified(_startTime, normalizeTime(startTime))
     _startTime = startTime
   }
 
   def getEndTime: DateTime = _endTime
 
   def setEndTime(endTime: DateTime) {
-//    endTime = normalizeTime(endTime)
-    updateModified(_endTime, endTime)
+    updateModified(_endTime, normalizeTime(endTime))
     _endTime = endTime
   }
 
@@ -120,12 +118,11 @@ class SdpFile {
     _rtpMedia._packetizationMode = 1
   }
 
-  def normalizeTime(dateTime: DateTime): DateTime = {
+  private def normalizeTime(dateTime: DateTime): DateTime = {
     if (dateTime == null) {
       return dateTime
     }
-    val newTime = dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
-    newTime.toDateTime
+      dateTime.withZone(DateTimeZone.UTC).withMillisOfSecond(0)
   }
 
   private def setSessionVersionIndexFromFileName() {
@@ -153,9 +150,11 @@ class SdpFile {
 */
 //    if (result == null) {
       val result = SdpMedia.createInstance(mediaType, port, Protocol.RTP_AVP).asInstanceOf[RtpMedia]
-      mediaType match {
-        case audio => result._payloadType = PAYLOAD_TYPE_FOR_AUDIO
-        case video => result._payloadType = PAYLOAD_TYPE_FOR_VIDEO
+      val strMedia = mediaType.getStringRepresentation
+
+      strMedia match {
+        case "audio" => result._payloadType = PAYLOAD_TYPE_FOR_AUDIO
+        case "video" => result._payloadType = PAYLOAD_TYPE_FOR_VIDEO
       }
 //      _sdpMediaList.add(result)
 //    }
@@ -253,19 +252,25 @@ class SdpFile {
   }
 
   object NetType extends Enumeration {
-    val IN = new NetType()
+    val IN = new NetType("IN")
 
     implicit def convertValue(v: Value): NetType = v.asInstanceOf[NetType]
   }
-  class NetType {}
+  class NetType private(private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
 
   object AddrType extends Enumeration {
-    val IP4 = new AddrType()
-    val IP6 = new AddrType()
+    val IP4 = new AddrType("IP4")
+    val IP6 = new AddrType("IP6")
 
     implicit def convertValue(v: Value): AddrType = v.asInstanceOf[AddrType]
   }
-  class AddrType {}
+  class AddrType private(private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
 
   private class Originator {
     var _userName: String = "-"
@@ -285,9 +290,9 @@ class SdpFile {
         .append(" ")
         .append(_sessionVersion)
         .append(" ")
-        .append(_netType)
+        .append(_netType.getStringRepresentation)
         .append(" ")
-        .append(_addrType)
+        .append(_addrType.getStringRepresentation)
         .append(" ")
         .append(_unicastAddress.getHostAddress)
         .toString()
@@ -312,18 +317,25 @@ class SdpFile {
         }
       }
     }
-/*
+
     override def toString: String = {
       initializeFields()
-      val sb = new StringBuilder().append(_netType).append(" ").append(_addrType)
+      val sb = new StringBuilder()
+      if (_address != null) {
+        sb.append(_netType.getStringRepresentation).append(" ").append(_addrType.getStringRepresentation)
         .append(" ")
         .append(_address.getHostAddress)
-      if (_ttl != null) {
-        sb.append("/").append(_ttl)
+        if (_ttl != null) {
+          sb.append("/").append(_ttl)
+        }
       }
-      sb.toString()
+      if (sb.length == 0) {
+        null
+      } else {
+        sb.toString()
+      }
     }
-*/  }
+  }
 
   private object SdpMedia {
     def createInstance(mediaType: MediaType, port: Int, protocol: Protocol): SdpMedia = {
@@ -407,13 +419,8 @@ class SdpFile {
       if (_protocol == null || _encoding == null) {
         return super.toString()
       }
-      var strMediaType:String = ""
-      _mediaType match {
-        case audio => strMediaType = "audio"
-        case video => strMediaType = "video"
-      }
       val sb = new StringBuilder()
-      sb.append("m=").append(strMediaType).append(" ").append(_port)
+      sb.append("m=").append(_mediaType.getStringRepresentation).append(" ").append(_port)
         .append(" ")
         .append(_protocol.getStringRepresentation)
         .append(" ")
@@ -518,14 +525,18 @@ class SdpFile {
   }
 
   object MediaType extends Enumeration {
-    val audio = new MediaType()
-    val video = new MediaType()
+    val audio = new MediaType("audio")
+    val video = new MediaType("video")
 
 //    class MediaTypeVal extends Val
 
-//    implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
+    implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
   }
-  class MediaType
+  class MediaType private(private var _stringRepresentation: String) {
+
+    def getStringRepresentation: String = _stringRepresentation
+  }
+
 
 
   object Protocol extends Enumeration {
