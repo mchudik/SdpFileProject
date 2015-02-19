@@ -36,7 +36,7 @@ class SdpFile {
   def getVersion: Int = _version
 
   def setVersion(version: Int) {
-//    updateModified(_version, version)
+    updateModifiedVal(_version, version)
     _version = version
   }
 
@@ -51,7 +51,7 @@ class SdpFile {
   def getSessionIdentifier: Long = _originator._sessionIdentifier
 
   def setSessionIdentifier(sessionIdentifier: Long) {
-//    updateModified(_originator._sessionIdentifier, sessionIdentifier)
+    updateModifiedVal(_originator._sessionIdentifier, sessionIdentifier)
     _originator._sessionIdentifier = sessionIdentifier
   }
 
@@ -239,12 +239,22 @@ class SdpFile {
     }
   }
 
+  protected def updateModifiedVal(oldValue: AnyVal, newValue: AnyVal) {
+    if (isModifiedVal(oldValue, newValue)) {
+      _modified = true
+    }
+  }
+
   private def isModified(oldValue: AnyRef, newValue: AnyRef): Boolean = {
     if (oldValue == null) {
       newValue != null
     } else {
       oldValue != newValue
     }
+  }
+
+  private def isModifiedVal(oldValue: AnyVal, newValue: AnyVal): Boolean = {
+      oldValue != newValue
   }
 
   private def convertToNtpTimeStamp(dateTime: DateTime): Long = {
@@ -527,8 +537,6 @@ class SdpFile {
   object MediaType extends Enumeration {
     val audio = new MediaType("audio")
     val video = new MediaType("video")
-
-//    class MediaTypeVal extends Val
 
     implicit def convertValue(v: Value): MediaType = v.asInstanceOf[MediaType]
   }
