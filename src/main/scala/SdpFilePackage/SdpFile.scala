@@ -1,5 +1,6 @@
 package SdpFilePackage
 
+import java.io.{FileWriter, BufferedWriter}
 import java.net.{Inet6Address, InetAddress}
 import org.joda.time.{DateTimeZone, DateTime}
 
@@ -7,10 +8,6 @@ import org.joda.time.{DateTimeZone, DateTime}
  * Created by mchudik on 2/16/2015.
  */
 class SdpFile {
-  def SayHello(name: String) = s"Hello, $name!"
-  def getRtpMediaString: String = {
-    _rtpMedia.toString()
-  }
   val SECONDS_DIFF_NTP_EPOCH_AND_JAVA_EPOCH = 2208988800L
   private val PAYLOAD_TYPE_FOR_AUDIO = 96
   private val PAYLOAD_TYPE_FOR_VIDEO = 97
@@ -27,7 +24,11 @@ class SdpFile {
   private var _endTime: DateTime = _
 //  private val _sdpMediaList: List[SdpMedia] = new ArrayList[SdpMedia]
 //  private var _previousSdpMediaList: List[SdpMedia] = _
-  private var _rtpMedia: RtpMedia = _
+//Temporary - Replace with Seq
+  private var _rtpMediaAudio: RtpMedia = _
+  private var _rtpMediaVideo: RtpMedia = _
+//Temporary - Replace with Seq
+
 
   def CRLF = "\r\n"
 
@@ -98,24 +99,26 @@ class SdpFile {
 
   def addOrUpdateMpeg4AudioMedia(port: Int, sampleRate: Int, channels: Int) {
 //    initializeForUpdatingMedia()
-    _rtpMedia = findExistingOrCreateRtpMedia(MediaType.audio,  port)
-    _rtpMedia._encoding = RtpMedia.Encoding.MPEG4_GENERIC
-    _rtpMedia._clockRate = sampleRate
-    _rtpMedia._audioChannels = channels
-    _rtpMedia._encodingParams = 2
-    _rtpMedia._profileLevelId = 2
-    _rtpMedia._mode = RtpMedia.Mode.AAC_HBR
-    _rtpMedia._sizeLength = 13
-    _rtpMedia._indexLength = 3
-    _rtpMedia._indexDeltaLength = 3
+    val rtpMedia = findExistingOrCreateRtpMedia(MediaType.audio,  port)
+    rtpMedia._encoding = RtpMedia.Encoding.MPEG4_GENERIC
+    rtpMedia._clockRate = sampleRate
+    rtpMedia._audioChannels = channels
+    rtpMedia._encodingParams = 2
+    rtpMedia._profileLevelId = 2
+    rtpMedia._mode = RtpMedia.Mode.AAC_HBR
+    rtpMedia._sizeLength = 13
+    rtpMedia._indexLength = 3
+    rtpMedia._indexDeltaLength = 3
+    _rtpMediaAudio = rtpMedia
   }
 
   def addOrUpdateH264VideoMedia(port: Int) {
 //    initializeForUpdatingMedia()
-    _rtpMedia = findExistingOrCreateRtpMedia(MediaType.video, port)
-    _rtpMedia._encoding = RtpMedia.Encoding.H264
-    _rtpMedia._clockRate = 90000
-    _rtpMedia._packetizationMode = 1
+    val rtpMedia = findExistingOrCreateRtpMedia(MediaType.video, port)
+    rtpMedia._encoding = RtpMedia.Encoding.H264
+    rtpMedia._clockRate = 90000
+    rtpMedia._packetizationMode = 1
+    _rtpMediaVideo = rtpMedia
   }
 
   private def normalizeTime(dateTime: DateTime): DateTime = {
@@ -204,6 +207,12 @@ class SdpFile {
 //    for (sdpMedia <- _sdpMediaList) {
 //      sb.append(sdpMedia.toString)
 //    }
+//Temporary
+      if(_rtpMediaAudio != null)
+        sb.append(_rtpMediaAudio.toString)
+      if(_rtpMediaVideo != null)
+        sb.append(_rtpMediaVideo.toString)
+//Temporary
     sb.toString()
   }
 
@@ -558,4 +567,17 @@ class SdpFile {
     def getStringRepresentation: String = _stringRepresentation
   }
 
+  def writeSdpToFile(): Boolean = {
+    var retval: Boolean = false
+    try {
+      val bw = new BufferedWriter(new FileWriter(getFileName))
+      bw.write(this.toString)
+      bw.close()
+      retval = true
+    } catch {
+      case e: Exception =>
+        retval = false
+    }
+    retval
+  }
 }

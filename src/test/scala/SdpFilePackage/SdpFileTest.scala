@@ -6,10 +6,6 @@ import java.net.InetAddress
  * Created by mchudik on 2/16/2015.
  */
 class SdpFileTest extends org.scalatest.FunSuite {
-  test("SayHello Method works correctly") {
-    val sdpFile = new SdpFile
-    assert(sdpFile.SayHello("SdpFile") == "Hello, SdpFile!")
-  }
   test("setVersion/getVersion Method works correctly") {
     val sdpFile = new SdpFile
     sdpFile.setVersion(12345)
@@ -57,18 +53,6 @@ class SdpFileTest extends org.scalatest.FunSuite {
     sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(127, 0, 0, 1)))
     assert(sdpFile.getConnectionAddress == InetAddress.getByName("127.0.0.1"))
   }
-  test("addOrUpdateMpeg4AudioMedia Method works correctly") {
-    val sdpFile = new SdpFile
-    sdpFile.addOrUpdateMpeg4AudioMedia(1935, 44100, 2)
-    val str = sdpFile.getRtpMediaString
-    println(str)
-  }
-  test("addOrUpdateH264VideoMedia Method works correctly") {
-    val sdpFile = new SdpFile
-    sdpFile.addOrUpdateH264VideoMedia(1935)
-    val str = sdpFile.getRtpMediaString
-    println(str)
-  }
   test("Audio/Video Test works correctly") {
     val sdpFile = new SdpFile
     sdpFile.setVersion(12345)
@@ -80,14 +64,11 @@ class SdpFileTest extends org.scalatest.FunSuite {
     sdpFile.setStartTime(startTime)
     val endTime = org.joda.time.Instant.now().toDateTime
     sdpFile.setEndTime(endTime)
-    sdpFile.setFileName("acee239c-413f-4e44-adfa-5e080db24b01.sdp")
+    sdpFile.setFileName("c:\\temp\\audio-video.sdp")
     sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(10,4,10,34)))
-    println(sdpFile.toString)
     sdpFile.addOrUpdateMpeg4AudioMedia(1935, 44100, 2)
-    val strAudio = sdpFile.getRtpMediaString
-    println(strAudio)
     sdpFile.addOrUpdateH264VideoMedia(1935)
-    val strVideo = sdpFile.getRtpMediaString
-    println(strVideo)
+    println(sdpFile.toString)
+    assert(sdpFile.writeSdpToFile())
   }
 }
