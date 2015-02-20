@@ -1,13 +1,15 @@
 package SdpFilePackage
 
-import java.io.{FileWriter, BufferedWriter}
+import java.io.{File, BufferedWriter, FileWriter}
 import java.net.{Inet6Address, InetAddress}
-import org.joda.time.{DateTimeZone, DateTime}
+
+import org.joda.time.{DateTime, DateTimeZone}
+import awsUtil.S3Util
 
 /**
  * Created by mchudik on 2/16/2015.
  */
-class SdpFile {
+class SdpFile extends S3Util {
   val SECONDS_DIFF_NTP_EPOCH_AND_JAVA_EPOCH = 2208988800L
   private val PAYLOAD_TYPE_FOR_AUDIO = 96
   private val PAYLOAD_TYPE_FOR_VIDEO = 97
@@ -568,16 +570,37 @@ class SdpFile {
   }
 
   def writeSdpToFile(): Boolean = {
-    var retval: Boolean = false
+    var result: Boolean = false
     try {
       val bw = new BufferedWriter(new FileWriter(getFileName))
       bw.write(this.toString)
       bw.close()
-      retval = true
+      result = true
     } catch {
       case e: Exception =>
-        retval = false
+        result = false
     }
-    retval
+    result
   }
+
+  def uploadSdpToS3(): Boolean = {
+    var result: Boolean = false
+    try {
+      val bucket = s"echo360-lps-wowza"
+      val filename = s"filename.sdp"
+      val awsAccessKeyId = s""
+      val awsSecretAccessKey = s""
+      val tempFile = File.createTempFile("sdp", "sdp")
+      tempFile.deleteOnExit()
+      val writer = new BufferedWriter(new FileWriter(tempFile))
+      writer.write(this.toString)
+      writer.close()
+      uploadFileToS3(awsAccessKeyId, awsSecretAccessKey, bucket, filename, tempFile)
+    } catch {
+      case e: Exception =>
+        result = false
+    }
+    result
+  }
+
 }

@@ -13,3 +13,14 @@ libraryDependencies += "org.scalaj" % "scalaj-time_2.9.1" % "0.7"
 libraryDependencies ++= Seq("org.slf4j" % "slf4j-api" % "1.7.5",  "org.slf4j" % "slf4j-simple" % "1.7.5")
 
 libraryDependencies += "commons-io" % "commons-io" % "2.3"
+
+libraryDependencies ++= Seq(
+  "com.github.scopt" %% "scopt" % "3.3.0",
+  "commons-lang" % "commons-lang" % "2.6",
+  "joda-time" % "joda-time" % "2.7",
+  "org.joda" % "joda-convert" % "1.7",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.9.19",
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.9.19",
+  "com.amazonaws" % "aws-java-sdk-sqs" % "1.9.19",
+  "org.monifu" %% "monifu" % "0.15.0"
+)

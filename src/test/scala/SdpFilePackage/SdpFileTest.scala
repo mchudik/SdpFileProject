@@ -65,10 +65,11 @@ class SdpFileTest extends org.scalatest.FunSuite {
     val endTime = org.joda.time.Instant.now().toDateTime
     sdpFile.setEndTime(endTime)
     sdpFile.setFileName("c:\\temp\\audio-video.sdp")
-    sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(10,4,10,34)))
+    sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(10, 4, 10, 34)))
     sdpFile.addOrUpdateMpeg4AudioMedia(1935, 44100, 2)
     sdpFile.addOrUpdateH264VideoMedia(1935)
     println(sdpFile.toString)
-    assert(sdpFile.writeSdpToFile())
+//    assert(sdpFile.writeSdpToFile())
+    sdpFile.uploadSdpToS3()
   }
 }
