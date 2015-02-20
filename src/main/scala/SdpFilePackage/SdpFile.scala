@@ -30,7 +30,9 @@ class SdpFile extends S3Util {
   private var _rtpMediaAudio: RtpMedia = _
   private var _rtpMediaVideo: RtpMedia = _
 //Temporary - Replace with Seq
-
+  private var _bucketName: String = _
+  private var _awsAccessKeyId: String = _
+  private var _awsSecretAccessKey: String = _
 
   def CRLF = "\r\n"
 
@@ -583,19 +585,34 @@ class SdpFile extends S3Util {
     result
   }
 
+  def configureS3(bucketName: String, awsAccessKeyId: String, awsSecretAccessKey: String) = {
+    _bucketName = bucketName
+    _awsAccessKeyId = awsAccessKeyId
+    _awsSecretAccessKey = awsSecretAccessKey
+  }
+
+  def testConnectionToS3(): Boolean = {
+    var result: Boolean = false
+    try {
+      testS3Connection(_bucketName, _awsAccessKeyId, _awsSecretAccessKey)
+      result = true
+    } catch {
+      case e: Exception =>
+        result = false
+    }
+    result
+  }
+
   def uploadSdpToS3(): Boolean = {
     var result: Boolean = false
     try {
-      val bucket = s"echo360-lps-wowza"
-      val filename = s"filename.sdp"
-      val awsAccessKeyId = s""
-      val awsSecretAccessKey = s""
       val tempFile = File.createTempFile("sdp", "sdp")
       tempFile.deleteOnExit()
       val writer = new BufferedWriter(new FileWriter(tempFile))
       writer.write(this.toString)
       writer.close()
-      uploadFileToS3(awsAccessKeyId, awsSecretAccessKey, bucket, filename, tempFile)
+      uploadFileToS3(_bucketName, _awsAccessKeyId, _awsSecretAccessKey, _fileName, tempFile)
+      result = true
     } catch {
       case e: Exception =>
         result = false

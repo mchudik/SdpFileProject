@@ -13,28 +13,26 @@ import scala.util.{Failure, Success, Try}
  */
 trait S3Util {
 
-  protected def createTransferManager(awsAccessKeyId: String, awsSecretAccessKey: String): TransferManager = {
-
-    val transferManager = new TransferManager(new AmazonS3Client(new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey)))
-    testConnection(transferManager)
-    transferManager
-  }
-
-  private def testConnection(transferManager: TransferManager): Unit = {
-
-    Try(transferManager.getAmazonS3Client.getS3AccountOwner) match {
+  protected def testS3Connection(bucket: String,
+                                 awsAccessKeyId: String,
+                                 awsSecretAccessKey: String
+                                 ): Unit = {
+    Try {
+      val transferManager = new TransferManager(new AmazonS3Client(new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey)))
+      transferManager.getAmazonS3Client.getS3AccountOwner
+    } match {
       case Failure(e) =>
         throw new RuntimeException(s"unable to establish connection to S3: ${e.getMessage}", e)
       case Success(_) =>
     }
   }
 
-  protected def uploadFileToS3(awsAccessKeyId: String,
-                                awsSecretAccessKey: String,
-                                bucket: String,
-                                key: String,
-                                file: File
-                                ): Unit = {
+  protected def uploadFileToS3(bucket: String,
+                               awsAccessKeyId: String,
+                               awsSecretAccessKey: String,
+                               key: String,
+                               file: File
+                               ): Unit = {
     Try {
       val transferManager = new TransferManager(new AmazonS3Client(new BasicAWSCredentials(awsAccessKeyId, awsSecretAccessKey)))
       val myUpload = transferManager.upload(bucket, key, file)

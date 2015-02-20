@@ -53,7 +53,26 @@ class SdpFileTest extends org.scalatest.FunSuite {
     sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(127, 0, 0, 1)))
     assert(sdpFile.getConnectionAddress == InetAddress.getByName("127.0.0.1"))
   }
-  test("Audio/Video Test works correctly") {
+  test("writeSdpToFile Method works correctly") {
+    val sdpFile = new SdpFile
+    sdpFile.setVersion(12345)
+    sdpFile.setSessionIdentifier(123456789)
+    sdpFile.setSessionVersion(123456789)
+    sdpFile.setSessionName("Session Name")
+    sdpFile.setSessionDescription("Session Description")
+    sdpFile.setFileName("C:\\temp\\audio-video.sdp")
+    sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(10, 4, 10, 34)))
+    sdpFile.addOrUpdateMpeg4AudioMedia(65528, 44100, 2)
+    sdpFile.addOrUpdateH264VideoMedia(65532)
+    sdpFile.setStartTime(org.joda.time.Instant.now().toDateTime)
+    sdpFile.setEndTime(org.joda.time.Instant.now().toDateTime)
+    assert(sdpFile.writeSdpToFile())
+  }
+  test("configureS3/testConnectionToS3 Method works correctly") {
+    val sdpFile = new SdpFile
+    assert(sdpFile.testConnectionToS3())
+  }
+  test("uploadSdpToS3 Method works correctly") {
     val sdpFile = new SdpFile
     sdpFile.setVersion(12345)
     sdpFile.setSessionIdentifier(123456789)
@@ -64,12 +83,11 @@ class SdpFileTest extends org.scalatest.FunSuite {
     sdpFile.setStartTime(startTime)
     val endTime = org.joda.time.Instant.now().toDateTime
     sdpFile.setEndTime(endTime)
-    sdpFile.setFileName("c:\\temp\\audio-video.sdp")
+    sdpFile.setFileName("audio-video1.sdp")
     sdpFile.setConnectionAddress(InetAddress.getByAddress(sdpFile.toBytes(10, 4, 10, 34)))
     sdpFile.addOrUpdateMpeg4AudioMedia(1935, 44100, 2)
     sdpFile.addOrUpdateH264VideoMedia(1935)
     println(sdpFile.toString)
-//    assert(sdpFile.writeSdpToFile())
-    sdpFile.uploadSdpToS3()
+    assert(sdpFile.uploadSdpToS3())
   }
 }
